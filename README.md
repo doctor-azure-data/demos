@@ -14,4 +14,4 @@ This logical view is from an another healthcare client
 
 ![Alt text](/Code/img/AndorArch.png?raw=true "Andor Data Architecture")
 
-
+![Alt text](/Code/img/AndorWF.png?raw=true "Andor Data WorkFlow Architecture")
