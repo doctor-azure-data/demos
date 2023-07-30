@@ -9,3 +9,9 @@
 ![Alt text](/Code/img/BAYER.png?raw=true "Bayer Data Architecture")
 
 Power point has a breakdown of each component
+
+This logical view is from an another healthcare client
+
+![Alt text](/Code/img/AndorArch.png?raw=true "Andor Data Architecture")
+
+
