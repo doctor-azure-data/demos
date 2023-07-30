@@ -1,4 +1,4 @@
-# Portolio of sample code
+# Portfolio of sample code
 
 1) You will find example Bicep files for Azure deployments.
 2) Databricks is all scala code. I like scala becuase of 'case classes' and static typing.
