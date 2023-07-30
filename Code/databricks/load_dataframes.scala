@@ -1,3 +1,7 @@
+/*
+	Read the CSV files in the directory and build dataframes.
+*/
+
 val root_folder = dbutils.fs.ls("dbfs:/mnt/preprocessing/StCloud/Pulse/").filter(_ isDir).toDS
  
 val visit_df = spark.read
