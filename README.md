@@ -5,4 +5,4 @@
 4) Snowflake code shows how I built an Hl7 parser. The scope was narrow but functional
 
 
-![Alt text](/code/img/BAYER.jpg?raw=true "Optional Title")
+![Alt text](/Code/img/BAYER.jpg?raw=true "Optional Title")
