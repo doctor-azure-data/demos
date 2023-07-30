@@ -39,10 +39,10 @@ module stg './storage.bicep' = {
 
 // Deploying data factory and its pipeline
 module adf './adf.bicep' = {
- name: 'dev_process_patients'
+ name: 'devprocesspatients'
  scope: rg
   params: {
-    factoryName: 'dev_process_patients'
+    factoryName: 'devprocesspatients'
     factoryLocation: rg.location
     pipelineName: pipelineName
   }
@@ -52,7 +52,7 @@ module adf './adf.bicep' = {
 
 module db 'databricks.bicep' ={
   scope: rg
-  name: 'dev_data_science_at_scale'
+  name: 'devdatascienceatscale'
   params: {
     location: rg.location
     name: dbName
