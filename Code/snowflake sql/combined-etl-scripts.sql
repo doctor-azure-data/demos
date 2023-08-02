@@ -13,7 +13,7 @@
 use <>;
 use warehouse <>;
 
-create or replace temporary table image_model
+CREATE OR REPLACE temporary table image_model
 (
     firstName      string,
     lastName       string,
@@ -25,11 +25,15 @@ create or replace temporary table image_model
 
 
 
-select *
+SELECT *
 FROM image_model;
 
-copy into image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
-FROM (select 
+/* 
+    Read the meta data from the datalake, and extract out the naming convention
+    Using a pattern below to extract out 10 digit codes
+*/
+COPY INTO image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
+FROM (SELECT 
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"','') firstname, --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"','') lastname, --lanme
       date(replace(regexp_substr(METADATA$FILENAME,'_[0-9]{2}-[0-9]{2}-[0-9]{4}_'),'_',''),'mm-dd-yyyy') dob, -- dob
@@ -40,8 +44,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
       
-      copy into image_model(mrn,firstname, lastname,dob, importPath) 
-FROM (select 
+COPY INTO image_model(mrn,firstname, lastname,dob, importPath) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -51,8 +55,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
       
-            copy into image_model(mrn,firstname, lastname,dob, importPath) 
-FROM (select 
+COPY INTO image_model(mrn,firstname, lastname,dob, importPath) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -62,8 +66,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
       
-copy into image_model(mrn,firstname, lastname,dob, importPath) 
-FROM (select 
+COPY INTO image_model(mrn,firstname, lastname,dob, importPath) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -89,7 +93,7 @@ CREATE OR REPLACE TABLE ATHENA.PDF
 );
 
 
-create or replace temporary table temp1
+CREATE OR REPLACE temporary table temp1
 (
      mrn string
     ,firstname string
@@ -99,15 +103,15 @@ create or replace temporary table temp1
     ,importTime datetime default current_timestamp()
 );
 
-
-copy into temp1 (mrn
+-- CREATE TEMP TABLE, AGAIN USING REGEX
+COPY INTO temp1 (mrn
                 ,firstname
                 ,lastname
                 ,dob
                 ,path)
 FROM
 (
-    select distinct
+    SELECT distinct
          regexp_substr(metadata$filename,'[0-9]+[.]pdf') as mrn
         ,regexp_substr(metadata$filename,'[.]zip/[A-Z.?]{1,20}-[A-Z]-?[A-Z]{1,20}?') as firstname
         ,regexp_substr(metadata$filename,'[.]zip/[A-Z.?]{1,20}') as  lastname
@@ -120,14 +124,14 @@ pattern='.*/.*[.]pdf';
 
 
 
-copy into temp1 (mrn
+COPY INTO temp1 (mrn
                 ,firstname
                 ,lastname
                 ,dob
                 ,path)
 FROM
 (
-    select distinct
+    SELECT distinct
          regexp_substr(metadata$filename,'[0-9]+[.]pdf') as mrn
         ,regexp_substr(metadata$filename,'[.]zip/[A-Z.?]{1,20}-[A-Z]-?[A-Z]{1,20}?') as firstname
         ,regexp_substr(metadata$filename,'[.]zip/[A-Z.?]{1,20}') as  lastname
@@ -139,7 +143,7 @@ FROM
 pattern='.*/.*[.]pdf';
 
 
-select distinct 
+SELECT distinct 
     replace(regexp_substr(mrn,'[0-9]+'),'.pdf','')::int mrn
    ,trim(split(replace(firstname,'.zip',''),'-')[1],'"') firstname
    ,ltrim(lastname,'.zip/') lastname
@@ -152,7 +156,7 @@ FROM temp1;
 
 insert into ATHENA.PDF
 (
-    select distinct 
+    SELECT distinct 
     replace(regexp_substr(mrn,'[0-9]+'),'.pdf','')::int mrn
    ,trim(split(replace(firstname,'.zip',''),'-')[1],'"') firstname
    ,ltrim(lastname,'.zip/') lastname
@@ -165,20 +169,20 @@ FROM temp1
 
 -- create consolidated view in OH.ATHENA of all PDF's
 
-select *
+SELECT *
 FROM <blank>.ATHENA.PDF
 union 
-select *
+SELECT *
 FROM STCLOUD.ATHENA.PDF;
 
 
 CREATE OR REPLACE VIEW OH.ATHENA.ALL_PDF
 AS
 (
-    select *
+    SELECT *
     FROM <blank>.ATHENA.PDF
     union 
-    select *
+    SELECT *
     FROM STCLOUD.ATHENA.PDF
 );
 
@@ -204,11 +208,11 @@ LIMIT 100;
 use stcloud;
 
 
-select *
+SELECT *
 FROM athena.pdf
 limit 100;
 
-copy into stcloud.athena.pdf(
+COPY INTO stcloud.athena.pdf(
                             mrn,
                             firstname,
                             lastname,
@@ -217,7 +221,7 @@ copy into stcloud.athena.pdf(
                             importTime
         
                         )
-FROM (  select 
+FROM (  SELECT 
         regexp_substr(METADATA$FILENAME,''),
        'St.Cloud',
         $1,
@@ -227,10 +231,10 @@ FROM (  select
         ON_ERROR = 'continue'
         ;
 
-select count(*) FROM athena.pdf;
+SELECT count(*) FROM athena.pdf;
 
 
-select * FROM athena.pdf
+SELECT * FROM athena.pdf
 
 
         ___________________________
@@ -249,7 +253,9 @@ CREATE OR REPLACE TABLE PHILIPS_IECG.hl7
 );
 --truncate table PHILIPS_IECG.hl7;
 
-
+/*
+    Create a very narrow HL7 parser. This will not generalize to all version of HL7, but worked in this context.
+*/
 ALTER FILE FORMAT "ANDOR"."PUBLIC".HL7 
 SET COMPRESSION = 'AUTO' RECORD_DELIMITE= 'MSH' 
 FIELD_DELIMITER='NONE' SKIP_HEADER = 0 FIELD_OPTIONALLY_ENCLOSED_BY = 'NONE' 
@@ -257,10 +263,10 @@ TRIM_SPACE = FALSE ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE ESCAPE = 'NONE'
 DATE_FORMAT = 'AUTO' TIMESTAMP_FORMAT = 'AUTO' 
 ;
 
-copy into PHILIPS_IECG.hl7(message,filename)
+COPY INTO PHILIPS_IECG.hl7(message,filename)
 FROM
 (
-    select 
+    SELECT 
         s.$1::VARIANT
         ,metadata$filename
     FROM @ATHENA.<blank>/landing/St.Cloud/Philips_iECG/ s
@@ -271,11 +277,13 @@ pattern = '.*[.]dat'
 ;
 
 
-select count(*) 
+SELECT count(*) 
 FROM PHILIPS_IECG.hl7;
 
+-- Use a view to 'rationalize' the data. Notice I am exploding an array to a table.
+
 CREATE OR REPLACE VIEW PHILIPS_IECG.hl7_vw as
-select --split(message,'|') --
+SELECT --split(message,'|') --
     replace(split(message,'PID') [0],'"','') mrn, 
     trim(replace(split(message,'|') [8],'^',''),'"') messageType,
     trim(split(message,'|') [6],'"') date,
@@ -291,17 +299,17 @@ select --split(message,'|') --
     filename sourceFile,
     importTime
 FROM PHILIPS_IECG.hl7,
-    table (flatten(select as_array(split(trim(message,'"'),'OBX')))) f
+    table (flatten(SELECT as_array(split(trim(message,'"'),'OBX')))) f
   limit 10000
    ;
    
    
 -- Evaluate the type of HL7 we are processing
 truncate table PHILIPS_IECG.hl7;
-copy into PHILIPS_IECG.hl7(message,filename)
+COPY INTO PHILIPS_IECG.hl7(message,filename)
 FROM
 (
-    select 
+    SELECT 
          s.$1::VARIANT
         ,metadata$filename
     FROM @ATHENA.<blank>/landing/St.Cloud/Philips_iECG/ s
@@ -311,7 +319,7 @@ pattern = '.*[.]dat'
 ;
 
 
-select * FROM PHILIPS_IECG.hl7_vw
+SELECT * FROM PHILIPS_IECG.hl7_vw
 
 
 
@@ -320,7 +328,7 @@ select * FROM PHILIPS_IECG.hl7_vw
 use stcloud;
 use warehouse orlandohealth;
 
-select
+SELECT
 'Athena' as source_system
 ,'St.Cloud - Athena' as source_system_name
 , null as source_system_patient_id
@@ -375,7 +383,7 @@ limit 100;
 
 
 
-select  a.mrn
+SELECT  a.mrn
        ,case
           when a.firstname is null then
               upper(b.firstname)
@@ -413,12 +421,12 @@ and soundex(a.dob) = soundex(b.dob)
 use stcloud;
 
 
-select * FROM stcloud.SUNRISE.COMBINEDCCDA;
+SELECT * FROM stcloud.SUNRISE.COMBINEDCCDA;
 
 create transient table oh.public.all_ccda
 as
 (
-    select mrn::int
+    SELECT mrn::int
        ,documents
        ,case 
           when path like '%drive%'
@@ -428,13 +436,13 @@ as
        ,path
 FROM stcloud.athena.ccda
 union
-select regexp_substr(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'id'):"@extension",'[0-9]+')::int as mrn
+SELECT regexp_substr(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'id'):"@extension",'[0-9]+')::int as mrn
         ,documents
         ,'St.Cloud ' as institution 
         ,path
 FROM  stcloud.pulse.ccda
 union
-select  mrn
+SELECT  mrn
         ,document
         ,'St.Cloud' as institution
         ,path
@@ -446,7 +454,7 @@ FROM stcloud.SUNRISE.COMBINEDCCDA
 
 desc table stcloud.SUNRISE.COMBINEDCCDA;
 
-select  mrn
+SELECT  mrn
         ,document
         ,'St.Cloud' as institution
         ,path
@@ -457,7 +465,7 @@ limit 10;
 use stcloud;
 use warehouse ORLANDOHEALTH;
 
-create or replace temporary table image_model
+CREATE OR REPLACE temporary table image_model
 (
     firstName      string,
     lastName       string,
@@ -469,11 +477,11 @@ create or replace temporary table image_model
 
 
 
-select *
+SELECT *
 FROM image_model;
 
-copy into image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
-FROM (select 
+COPY INTO image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
+FROM (SELECT 
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"','') firstname, --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"','') lastname, --lanme
       date(replace(regexp_substr(METADATA$FILENAME,'_[0-9]{2}-[0-9]{2}-[0-9]{4}_'),'_',''),'mm-dd-yyyy') dob, -- dob
@@ -484,8 +492,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
       
-      copy into image_model(mrn,firstname, lastname,dob, importPath) 
-FROM (select 
+      COPY INTO image_model(mrn,firstname, lastname,dob, importPath) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -495,8 +503,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
       
-            copy into image_model(mrn,firstname, lastname,dob, importPath) 
-FROM (select 
+            COPY INTO image_model(mrn,firstname, lastname,dob, importPath) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -506,8 +514,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
       
-copy into image_model(mrn,firstname, lastname,dob, importPath) 
-FROM (select 
+COPY INTO image_model(mrn,firstname, lastname,dob, importPath) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -524,8 +532,8 @@ FROM (select
 
 use stcloud;
 
-copy into stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
-FROM (select 
+COPY INTO stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -537,19 +545,19 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/.*/.*[a-z | A-Z]{1,20}[.]png|.*/.*/.*[a-z | A-Z]{1,20}[.]gif';
       
-      select * FROM stage_patientModel;
+      SELECT * FROM stage_patientModel;
       
 desc table stage_patientmodel;
       
-select firstname 
+SELECT firstname 
 FROM stage_patientModel
 order by 1 desc
 
 
 
 
-copy into stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
-FROM (select 
+COPY INTO stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -563,7 +571,7 @@ FROM (select
       
     ;
     
-    select *
+    SELECT *
     FROM bayfront.athena.stage_html_patient_model;
 
 
@@ -624,7 +632,7 @@ CREATE OR REPLACE TABLE master.patients
 
 create schema landing;
 
-create or replace transient table landing.mirth_hl7
+CREATE OR REPLACE transient table landing.mirth_hl7
 (
     message variant,
     importTime datetime default current_timestamp(),
@@ -645,9 +653,9 @@ CREATE OR REPLACE TABLE landing.ccda_patients
 );
 
 
-create or replace stream patients_hl7_stream on table landing.hl7_patients;
+CREATE OR REPLACE stream patients_hl7_stream on table landing.hl7_patients;
 
-create or replace stream patients_xml_stream  on table landing.ccda_patients;
+CREATE OR REPLACE stream patients_xml_stream  on table landing.ccda_patients;
 
 
 insert into landing.hl7_patients (message,importTime,importedBy,isValid,invalidatedBy) values
@@ -685,7 +693,7 @@ insert into landing.ccda_patients (message,importTime,importedBy,isValid,invalid
   
 );
 
-select h.message,x.message
+SELECT h.message,x.message
 FROM patients_hl7_stream h, patients_xml_stream x
 
 
@@ -708,10 +716,10 @@ CREATE OR REPLACE TABLE pulse.medications
 );
 
 
-copy into stcloud.pulse.medications
+COPY INTO stcloud.pulse.medications
 FROM 
 (
-     select 
+     SELECT 
      $1:AccountNumber,
      $1:MRN ,
      $1:AdmitDate date,
@@ -730,7 +738,7 @@ FROM
 File_format= andor.master.PARQUETFILETYPE
 
 
-select count(*)FROM stcloud.pulse.medications
+SELECT count(*)FROM stcloud.pulse.medications
 
 
 
@@ -739,22 +747,23 @@ use stcloud;
 use schema athena;
 use role accountadmin;
 -- re-create the ccda table and re-make into a transient table
-grant select on all tables on schema MY_DB.MY_SCHEMA to role TEST_ROLE;
+grant SELECT on all tables on schema MY_DB.MY_SCHEMA to role TEST_ROLE;
 
-grant select on all tables in schema stcloud.athena to role public;
+grant SELECT on all tables in schema stcloud.athena to role public;
 
 
-grant select on all objects in schema athena to public;
+grant SELECT on all objects in schema athena to public;
 
 show views;
 
-select * 
+SELECT * 
 FROM athena.ccda_vw;
 
+-- CCDA's are very deep structures, xmlget is an ideal function to extract out data from its elements.
 CREATE OR REPLACE VIEW STCLOUD.ATHENA.CCDA_VW
 as
 (
-    select 
+    SELECT 
     
     trim(split(xmlget(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'patient'),'name'),'given'):"$",' ')[0],'"') as firstname
     ,trim(split(xmlget(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'patient'),'name'),'family'):"$",' ')[0],'"') as lastname 
@@ -782,7 +791,7 @@ FROM  stcloud.athena.ccda
 
 
 
-create or replace transient table public.stage_ccda
+CREATE OR REPLACE transient table public.stage_ccda
 (
     documents variant,
     path string,
@@ -791,12 +800,12 @@ create or replace transient table public.stage_ccda
 
 
 --landing/St.Cloud/Athena/Athena_Drop/CCDA/CCDA_Unformatted/
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
                 documents,
                 path 
 
             )
-FROM (select 
+FROM (SELECT 
             athena.$1,
             METADATA$FILENAME -- import path
             FROM @ATHENA.<blank>/landing/St.Cloud/Athena/Athena_Drop/CCDA/CCDA_Unformatted/ athena
@@ -806,12 +815,12 @@ pattern = '.*xml'
 ON_ERROR = CONTINUE;
      
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     pulse.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/Pulse/CCDAfIleDrop/ pulse
@@ -822,12 +831,12 @@ ON_ERROR = CONTINUE
 
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/Sunrise_CCDA_Extract/ sunrise
@@ -838,12 +847,12 @@ ON_ERROR = CONTINUE
 
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_01_28_2021/ sunrise
@@ -854,12 +863,12 @@ ON_ERROR = CONTINUE
 
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_01_30_2021A/RoundTwo/ sunrise
@@ -869,12 +878,12 @@ pattern = '.*xml'
 ON_ERROR = CONTINUE
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_01_30_2021B/ sunrise
@@ -884,12 +893,12 @@ pattern = '.*xml'
 ON_ERROR = CONTINUE
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_03_17_2021/ sunrise
@@ -899,12 +908,12 @@ pattern = '.*xml'
 ON_ERROR = CONTINUE
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_04_23_2021/Pickup/ sunrise
@@ -914,12 +923,12 @@ pattern = '.*xml'
 ON_ERROR = CONTINUE
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_04_24_2021/04_24_2021/ sunrise
@@ -929,12 +938,12 @@ pattern = '.*xml'
 ON_ERROR = CONTINUE
 ;
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     sunrise.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/landing/St.Cloud/SunriseCCDA/Archived/Darryl_04_24_2021/Missed_04_23_2021/ sunrise
@@ -953,12 +962,12 @@ ON_ERROR = CONTINUE
 -- landing/St.Cloud/SunriseCCDA/Archived/Darryl_04_24_2021/Missed_04_23_2021/ --F
 
 
-copy into public.stage_ccda(
+COPY INTO public.stage_ccda(
             documents,
             path 
 
     )
-FROM(select
+FROM(SELECT
     athena.$1,
     METADATA$FILENAME -- import path
     FROM @ATHENA.<blank>/preprocessing/Bayfront/Athena/drive1/ccda/CCDAs athena
@@ -969,10 +978,10 @@ ON_ERROR = CONTINUE
 ;
 
 
-select count(distinct documents) FROM public.stage_ccda;
+SELECT count(distinct documents) FROM public.stage_ccda;
 
 
-select * FROM
+SELECT * FROM
 public.stage_ccda
 limit 100;
 
@@ -980,16 +989,16 @@ limit 100;
 
 
 
-select * 
+SELECT * 
 FROM public.stage_ccda
 where path like '%Bayfront%' 
 limit 100
 
 
-create or replace transient table oh.public.all_ccda
+CREATE OR REPLACE transient table oh.public.all_ccda
 as
 (
-    select distinct xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'id'):"@extension"::string as mrn
+    SELECT distinct xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'id'):"@extension"::string as mrn
        ,documents
         ,xmlget(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'patient'),'name'),'given'):"$"::string as "FirstName"
         ,xmlget(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'patient'),'name'),'family'):"$"::string as "LastName"
@@ -1013,11 +1022,11 @@ FROM stcloud.public.stage_ccda
 
 
 
-select ccda.*
+SELECT ccda.*
 FROM stcloud.public.masterpatientlist p
 left join 
 (
-    select 
+    SELECT 
     mrn
     ,xmlget(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'patient'),'name'),'given'):"$"::string as "FirstName"
     ,xmlget(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'patient'),'name'),'family'):"$"::string as "LastName"
@@ -1034,7 +1043,7 @@ where ccda.mrn is null;
 
 
 
-select *
+SELECT *
 FROM oh.public.all_ccda
 where UPPER(firstname) = 'BARROWS'
 AND UPPER(lastname) = 'LOIS'
@@ -1058,13 +1067,13 @@ CREATE OR REPLACE TABLE stcloud.pulse.ccda
 );
 
 
-copy into stcloud.pulse.ccda(
+COPY INTO stcloud.pulse.ccda(
                             mrn,
                             institution,
                             documents,
                             path
                         )
-FROM (select 
+FROM (SELECT 
             null,
            'St.Cloud',
             $1,
@@ -1079,7 +1088,7 @@ FROM (select
 CREATE OR REPLACE VIEW stcloud.pulse.ccda_vw
 as
 (
-    select trim(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'id'):"@extension",'"') mrn
+    SELECT trim(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'id'):"@extension",'"') mrn
     ,trim(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'addr'),'streetAddressLine'):"$",'"') address
     ,trim(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'addr'),'city'):"$",'"') city
     ,trim(xmlget(xmlget(xmlget(xmlget(documents,'recordTarget'),'patientRole'),'addr'),'state'):"$",'"') state
@@ -1096,7 +1105,7 @@ FROM  stcloud.pulse.ccda
 );
 
 
-select * FROM stcloud.pulse.ccda_vw;
+SELECT * FROM stcloud.pulse.ccda_vw;
 
 
 
@@ -1234,7 +1243,7 @@ CREATE OR REPLACE TABLE pulse.masterPatients
 );
 
 
-copy into pulse.masterPatients
+COPY INTO pulse.masterPatients
 (
     PT_PATIENT_COID,
     PT_PATIENT_NUMBER,
@@ -1365,7 +1374,7 @@ copy into pulse.masterPatients
 )
 FROM 
     (
-        select 
+        SELECT 
         $1:PT_PATIENT_COID,
         $1:PT_PATIENT_NUMBER,
         $1:PT_PATIENT_NAME,
@@ -1498,14 +1507,14 @@ FROM
         on_error = 'continue'
 
 
-select * 
+SELECT * 
 FROM pulse.masterPatients
 limit 100;
 
 
 
-copy into stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
-FROM (select 
+COPY INTO stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -1517,8 +1526,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/.*/.*[a-z | A-Z]{1,20}[.]png|.*/.*/.*[a-z | A-Z]{1,20}[.]gif';
       
-      copy into stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
-FROM (select 
+      COPY INTO stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -1530,8 +1539,8 @@ FROM (select
       file_format = <blank>.APPOINTMENTS.HTML
       pattern = '.*/.*/.*[a-z | A-Z]{1,20}[.]png|.*/.*/.*[a-z | A-Z]{1,20}[.]gif';
       
-      copy into stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
-FROM (select 
+      COPY INTO stage_patientModel(mrn,firstname, lastname,dob,path,sourceSystems,sourceDataType) 
+FROM (SELECT 
       replace(regexp_substr(METADATA$FILENAME,'_[0-9]{4,20}_'),'_',''), -- mrn
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"',''), --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[6],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"',''), --lanme
@@ -1567,10 +1576,10 @@ CREATE OR REPLACE TABLE pulse.medications
 );
 
 
-copy into stcloud.pulse.medications
+COPY INTO stcloud.pulse.medications
 FROM 
 (
-     select 
+     SELECT 
      $1:AccountNumber,
      $1:MRN ,
      $1:AdmitDate date,
@@ -1589,7 +1598,7 @@ FROM
 File_format= andor.master.PARQUETFILETYPE
 
 
-select count(*)FROM stcloud.pulse.medications
+SELECT count(*)FROM stcloud.pulse.medications
 
 
 
@@ -1642,7 +1651,7 @@ CREATE OR REPLACE TABLE public.visits
 CREATE OR REPLACE VIEW stcloud.public.masterPatientList_vw
 as
 (
- select distinct
+ SELECT distinct
          patientid as Mrn
         ,regexp_substr(upper(regexp_substr(firstname,'[a-z |A-Z]{1,50}')::string),'[A-Z]{1,20}')::string firstname 
         ,upper(trim(regexp_substr(lastname,'[a-z | A-Z]{1,50}'))::string)::string lastname
@@ -1681,7 +1690,7 @@ as
         and is_int(mrn)
        
     UNION 
-        select distinct
+        SELECT distinct
                 mrn
                ,regexp_substr(upper(PatientFirstName),'[A-Z]{1,20}') PatientFirstName
                ,regexp_substr(upper(PatientLastName),'[A-Z]{1,20}') PatientLastName
@@ -1698,7 +1707,7 @@ as
         and upper(trim(regexp_substr(PatientLastName,'[a-z | A-Z]{1,50}'))::string) not in ('TEST','DO NOT USE')
        
     UNION
-        select distinct
+        SELECT distinct
                 mrn
                ,firstname
                ,lastname
@@ -1715,7 +1724,7 @@ as
         and upper(trim(regexp_substr(lastname,'[a-z | A-Z]{1,50}'))::string) not in ('TEST','DO NOT USE')
        
     UNION
-        select distinct
+        SELECT distinct
                 "patientid" mrn
                ,"patient firstname" firstname
                ,"patient lastname" lastname
@@ -1759,7 +1768,7 @@ as
     
         UNION
     
-        select distinct
+        SELECT distinct
                 mrn,
                 firstname,
                 lastname,
@@ -1780,7 +1789,7 @@ as
 
 
 
-select distinct
+SELECT distinct
         mrn, 
         firstname,
         lastname,
