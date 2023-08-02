@@ -1,5 +1,6 @@
 /*
-  This is example code created to help you evaluate the type of work i've done
+  This is example code created to help you evaluate the type of work i've done; 
+  although this is not production code, it serves as a sample.
 
   Param file is used to store variables. 
   Upon deployment the file will create a resource group with all required artifacts
