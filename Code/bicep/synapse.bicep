@@ -63,7 +63,7 @@ resource synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01' existing = {
 }
 
 // Create Spark Pool Resource
-resource sparkPool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-01' = {
+/*resource sparkPool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-01' = {
   parent: synapseWorkspace
   name: sparkPoolName
   location: location
@@ -94,7 +94,5 @@ resource sparkPool 'Microsoft.Synapse/workspaces/bigDataPools@2021-06-01' = {
       maxExecutors: sparkMaxExecutorCount
     }
 
-
-    cacheSize: sparkCacheSize
   }
-}
+}*/

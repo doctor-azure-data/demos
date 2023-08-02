@@ -25,3 +25,11 @@ The diagram is a workflow model that they use to streamline provider and patient
 virtual visits.
 
 ![Alt text](/Code/img/AndorWF.png?raw=true "Andor Data WorkFlow Architecture")
+
+
+This diagram shows a very simple example of how Bicep can be used to deploy data services.
+
+![Alt text](/Code/img/BicepArch.png?raw=true "Bicep Architecture View")
+
+
+
