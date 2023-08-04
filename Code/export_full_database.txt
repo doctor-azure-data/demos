@@ -1,0 +1,20 @@
+--Example Exporting Full Database Using Data Pump
+
+expdp system/password@db_schema full=Y directory=data_pump_dir dumpfile=full_export.dmp logfile=full_export.log
+
+-- The 'system' user is used here, replace with an appropriate user with the necessary privileges.
+-- The 'data_pump_dir' is an Oracle directory object pointing to the directory where the export dumpfile and log will be created.
+-- The 'full_export.dmp' is the name of the dump file where the data will be exported.
+-- The 'full_export.log' is the name of the log file for the export operation.
+-- The 'full=Y' parameter indicates a full database export.
+
+-- Exporting Specific Tables Using Data Pump
+
+-- expdp hr/password@db_schema tables=employees,departments directory=data_pump_dir dumpfile=tables_export.dmp logfile=tables_export.log
+
+-- Exporting Data Using Query Filtering
+
+expdp hr/password@db_schema tables=employees query="WHERE salary > 50000" directory=data_pump_dir dumpfile=salary_filter_export.dmp logfile=salary_filter_export.log
+
+
+
