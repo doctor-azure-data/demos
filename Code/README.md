@@ -1,5 +1,10 @@
 # Featured Code
 
+
+---
+
+### Snowflake import code using REGEX to strip file names and comb through files that match a given pattern
+
 ```COPY INTO image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
 FROM (SELECT 
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"','') firstname, --fname
