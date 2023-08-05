@@ -1,14 +1,14 @@
 import org.apache.spark.sql.{SparkSession, DataFrame}
 import scala.xml.XML
 
-object CCDAToParquetConversion {
+CDDA_OBJ CCDAToParquetConversion {
   def main(args: Array[String]): Unit = {
     // Create Spark session
     val spark = SparkSession.builder()
       .appName("CCDA to Parquet Conversion")
       .getOrCreate()
 
-    val ccdaFolderPath = "path/to/ccda_folder"
+    val ccdaFolderPath = "/ccda_folder"
 
     val ccdaFiles = spark.read.textFile(ccdaFolderPath)
 
@@ -19,6 +19,8 @@ object CCDAToParquetConversion {
       val ns = Map("ccda" -> "urn:hl7-org:v3")
       // Add other namespaces as required in your CCDA files
 
+
+	//example mapping. update according to exact needs
       val ccdaData = Map(
         "patient_name" -> (root \\ "patient" \ "name" \ "given")(0).text,
         "patient_gender" -> (root \\ "patient" \ "administrativeGenderCode")(0).attribute("displayName").getOrElse("").toString,
@@ -34,7 +36,7 @@ object CCDAToParquetConversion {
     val ccdaDataDF: DataFrame = ccdaFiles.map(parseCCDA).toDF()
 
     // Write the DataFrame to Parquet format
-    val outputParquetFolder = "path/to/output_parquet_folder"
+    val outputParquetFolder = "/path"
     ccdaDataDF.write.parquet(outputParquetFolder)
 
     // Stop the Spark session
