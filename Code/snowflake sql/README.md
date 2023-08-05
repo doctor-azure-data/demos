@@ -1,12 +1,12 @@
 # Featured Code
 
-### Snowflake auto-ingest
+### Snowflake auto-ingest from ADLS
 
 
 ```
 -- Create a stage to store the data files.
 CREATE OR REPLACE STAGE s3_stage
-LOCATION 's3://bucket/prefix';
+LOCATION 'abfss://my-container';
 
 -- Create a table to store the loaded data.
 CREATE TABLE my_table (
