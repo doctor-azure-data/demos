@@ -11,7 +11,8 @@ The exporting application was Athena. As this was an 'application' level export,
 I needed a way to select specific data from this 'garbage dump'. Hence the fun regex below:
 
 
-```COPY INTO image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
+```
+COPY INTO image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
 FROM (SELECT 
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[0],'"','') firstname, --fname
       replace(split(regexp_substr(split(METADATA$FILENAME,'/')[5],'[A-Z]{1,20}-[A-Z]{1,20}'),'-')[1],'"','') lastname, --lanme
