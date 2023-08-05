@@ -15,4 +15,4 @@ FROM (SELECT
       METADATA$FILENAME path -- import path
       FROM @ATHENA.<blank>/preprocessing/StCloud/Athena/HTML/ClinicalCharts_PG_26-261_A s)
       file_format = <blank>.APPOINTMENTS.HTML
-      pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';```
+      pattern = '.*/[a-z | A-Z0-9]{10}[.][a-z | A-Z]{3}';
