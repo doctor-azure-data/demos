@@ -1,5 +1,6 @@
 # Featured code
 
+### Databricks Scala code that parses out patients using REGEX and case classes.
 ---
 
 ``` 
@@ -24,13 +25,13 @@ case class PATIENT ( FirstName: String
                     ,FilePath: String
                     ,FileSize:Long)
  
- Standardize the delimiter. Some names  were split by and one of [,.-] 
+-- Standardize the delimiter. Some names  were split by and one of [,.-] 
 def standardize_del (input: String) : String =
 {
   return input.replace(".","-").replaceAll("[-]+","-").replaceAll("_","-")
 }
  
-Standardize the lastnames
+-- Standardize the lastnames
 def clean_last_name(input: String) : String =
 {
   try {return input.replaceFirst("^[-]+","").replace("zip/","").split("-")(0).trim()}
@@ -40,7 +41,7 @@ def clean_last_name(input: String) : String =
   return ""
 }
  
-Standardize the firstnames
+-- Standardize the firstnames
 def clean_first_name(input: String) : String =
 {
   try {return input.replaceFirst("^[-]+","").replace("zip/","").split("-")(1).trim()}
@@ -64,7 +65,7 @@ root_folder.select("path").collect()
                                            ccda_container += CCDA_FILES(file.name, file.path,file.size)
                                            dbutils.fs.ls(subfolder.path)
                                              .foreach(file => (
-                                               if(file.name.endsWith(".xml"))
+                                               if(file.name.endsWith(".xml")) -- If this is an xml file....
                                                {
                                                  ccda_container += (PATIENT(clean_first_name(standardize_del((name_pattern findFirstIn file.name).map(_.toString).getOrElse("NONE-NONE")))
                                                                          ,clean_last_name(standardize_del((name_pattern findFirstIn file.name).map(_.toString).getOrElse("NONE-NONE")))
@@ -88,7 +89,7 @@ root_folder.select("path").collect()
                                                  println(file.name)
  
                                                }
-                                               else if(file.name.endsWith(".pdf"))
+                                               else if(file.name.endsWith(".pdf")) -- if this is a PDF file....
                                                {
  
                                                   pdf_container += (PATIENT(clean_first_name(standardize_del((name_pattern findFirstIn file.name).map(_.toString).getOrElse("NONE-NONE")))
@@ -115,7 +116,7 @@ root_folder.select("path").collect()
                                                  
  
                                                }
-                                               else if(file.name.endsWith(".jpg") || file.name.endsWith(".gif") || file.name.endsWith(".png"))
+                                               else if(file.name.endsWith(".jpg") || file.name.endsWith(".gif") || file.name.endsWith(".png")) -- If this is a file that is a picture....
                                                {
  
                                                   image_container += ((PATIENT(clean_first_name(standardize_del((name_pattern_images findFirstIn file.path).map(_.toString).getOrElse("NONE-NONE")))
