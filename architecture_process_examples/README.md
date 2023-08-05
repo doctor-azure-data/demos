@@ -3,37 +3,38 @@
 Business Drivers and Goals
 The project is driven by a combination of strategic imperatives and operational needs. The key business drivers and goals include:
 
-## Strategic Modernization: 
+### Strategic Modernization: 
 Migrate the legacy on-premise Oracle databases to the Azure cloud to embrace modern cloud-based infrastructure, leveraging its scalability and agility.
 Enhanced Patient Care: Introduce real-time analytics and AI capabilities to provide healthcare professionals with insights for making informed decisions, enhancing patient care outcomes, and optimizing resource allocation.
 Operational Efficiency: Streamline data processing, analysis, and reporting through the implementation of a robust data lake architecture using delta tables, ensuring data consistency and efficiency in handling structured and unstructured data.
 Stakeholder Perspectives
 Stakeholders' viewpoints and concerns play a critical role in shaping the architecture. These perspectives include:
 
-## Hospital Leadership 
+### Hospital Leadership 
 Focused on the project's alignment with strategic goals, ROI, and regulatory compliance, while ensuring the transformation enhances patient care quality.
 Clinical Staff: Seeking immediate access to patient data, real-time analytics, and AI-driven insights to support clinical decisions and improve patient outcomes.
 IT Department: Concerned with the technical feasibility, security, privacy, and scalability of the proposed solution, along with ensuring a smooth migration process.
 Key Architecture Requirements (Functional & Non-Functional)
 Functional Requirements:
 
-## Real-time Patient Data Access
+### Real-time Patient Data Access
 Implement a secure and efficient mechanism for healthcare professionals to access patient records instantly, enabling accurate diagnoses and timely treatment decisions.
 Seamless Integration: Establish seamless integration between the new Azure-based architecture and existing hospital applications, ensuring a consistent user experience and efficient data exchange.
 Advanced Analytics and AI: Develop and deploy AI models that predict patient outcomes, optimize resource allocation, and recommend treatment plans, thereby improving the quality of patient care.
 Data Lake for Storage and Processing: Design and implement a comprehensive data lake architecture using delta tables to accommodate diverse healthcare data, including electronic health records, medical images, and sensor data.
 Non-Functional Requirements:
 
-## High Availability and Disaster Recovery
+### High Availability and Disaster Recovery
  Design the architecture to provide high availability with minimal downtime during maintenance or failures. Implement robust disaster recovery mechanisms to ensure data integrity and service continuity.
 Scalability and Performance: Architect for scalability to handle peak loads during critical periods, such as patient admissions, without compromising performance. Ensure that the system can scale horizontally as data volumes grow.
 Data Privacy and Compliance: Adhere rigorously to healthcare regulations such as HIPAA and GDPR. Ensure data privacy, security, and compliance with patient data protection laws to maintain patients' trust.
 Security Measures: Implement multi-layered security measures, including encryption, access controls, authentication mechanisms, and continuous monitoring, to safeguard sensitive patient data against unauthorized access and cyber threats.
-Phase B: Business Architecture
-Business Process and Functional Requirements
-Define and map out the essential business processes that the new architecture needs to support:
 
-## Patient Data Management
+# Phase B: Business Architecture
+## Business Process and Functional Requirements
+## Define and map out the essential business processes that the new architecture needs to support:
+
+### Patient Data Management
 Establish efficient mechanisms to capture, store, retrieve, and update patient records securely, ensuring data accuracy and integrity throughout the patient journey.
 Clinical Analytics: Enable healthcare professionals to monitor patient data in real-time, facilitating quicker responses and better-informed decisions for improved patient outcomes.
 Billing and Financials: Integrate the new architecture with the hospital's billing systems, ensuring accurate and timely invoicing and a seamless financial process.
