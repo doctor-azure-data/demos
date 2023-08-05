@@ -1,4 +1,4 @@
-# Example Data Factor template for migrating Oracle to Azure
+# Example Data Factory template for migrating Oracle to Azure
 
 --- 
 
