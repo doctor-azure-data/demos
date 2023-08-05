@@ -1,4 +1,4 @@
-Example process flow show how architecture is structured and organized.
+# Example process flow show how architecture is structured and organized.
 
 
 # Phase A: Architecture Vision
@@ -85,7 +85,8 @@ Billing and Financial Integration:
 #### Objective: 
 Ensure seamless integration between patient data and billing systems.
 
-#### Solution: Implement integration points between the architecture and billing systems to ensure accurate invoicing and financial processes aligned with patient care.
+#### Solution: 
+Implement integration points between the architecture and billing systems to ensure accurate invoicing and financial processes aligned with patient care.
 Secure User Authentication:
 
 #### Objective: 
@@ -162,12 +163,6 @@ Communication and Stakeholder Management:
  Keep stakeholders informed about the progress of the migration and address concerns.
 Solution: Maintain clear communication channels to provide regular updates to stakeholders. Address any questions or concerns promptly.
 By meticulously planning and implementing a robust Data Migration Strategy, the project can ensure a seamless transition of data from legacy systems to the new Azure-based architecture. This approach minimizes risks, maintains data integrity, and contributes to the overall success of the migration and transformation project.
-
-
-
-
-
-+++++
 
 ## Data Lake Design 
 Architect a robust and scalable data lake using delta tables to accommodate the heterogeneous data types generated in a hospital environment, such as structured electronic health records, unstructured medical images, and streaming sensor data.
