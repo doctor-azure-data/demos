@@ -10,6 +10,7 @@ The exporting application was Athena. As this was an 'application' level export,
  
 I needed a way to select specific data from this 'garbage dump'. Hence the fun regex below:
 
+The statement pulls from a Snowflake stage, which pointed to our ADLS environment. It's called 'image_model' because i was searching for x-rays that were associated to appointments
 
 ```
 COPY INTO image_model(firstname, lastname,dob,mrn, sourceSystems, path) 
