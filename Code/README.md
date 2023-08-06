@@ -6,7 +6,7 @@
 ### Snowflake import code using REGEX to strip file names and comb through files that match a given pattern
 
 #### Context:
-The exporting application was Athena. As this was an 'application' level export, they (the hospital) did not have a process defined for database level migration for an application. Don't ask my why, it was 'the way it was'. Athena's exports are ALL file types, including json, img,png, html, xml. etc... 
+The exporting application was Athena. As this was an 'application' level export, they (the hospital) did not have a process defined for database level migration for an application. Don't ask me why, it was 'the way it was'. Athena's exports are ALL file types, including json, img,png, html, xml. etc... 
  
 I needed a way to select specific data from this 'garbage dump'. Hence the fun regex below:
 
