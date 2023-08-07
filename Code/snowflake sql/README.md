@@ -5,7 +5,7 @@
 
 ```
 -- Create a stage to store the data files.
-CREATE OR REPLACE STAGE s3_stage
+CREATE OR REPLACE STAGE stage
 LOCATION 'abfss://my-container';
 
 -- Create a table to store the loaded data.
@@ -19,7 +19,7 @@ CREATE TABLE my_table (
 
 CREATE OR REPLACE PIPE ingest_pipe
 COPY INTO my_table
-FROM @s3_stage
+FROM @stage
 FILE_PATTERN='*.csv'
 ON_ERROR = SKIP_FILE;
 
